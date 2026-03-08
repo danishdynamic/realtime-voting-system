@@ -20,7 +20,7 @@ from .option import Option
 # Define dataclass for Poll entity
 @dataclass
 class Poll:
-    id : int 
+    id : str 
     public_id : str
     question : str
     created_by : str
@@ -41,3 +41,9 @@ class Poll:
         """Check if the poll is currently active."""
         now = datetime.now()
         return self.start_time <= now <= self.end_time
+
+    def has_option(self, option_id: str) -> bool:
+        for options in self.options :
+            if options.id == option_id:
+                return True
+        return False
