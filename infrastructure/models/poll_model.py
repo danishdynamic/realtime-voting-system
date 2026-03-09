@@ -1,0 +1,16 @@
+from sqlalchemy import Column, String, DateTime
+from ..db.database import Base
+
+class PollModel(Base):
+
+    __tablename__ = "polls"
+
+    id = Column(String, primary_key=True, index=True)
+    public_id = Column(String, unique=True, index=True, nullable=False)
+    question = Column(String, nullable=False)
+    created_by = Column(String, nullable=False)
+
+    start_time = Column(DateTime, nullable=False)
+    end_time = Column(DateTime, nullable=False)
+
+    created_at = Column(DateTime, nullable=False)

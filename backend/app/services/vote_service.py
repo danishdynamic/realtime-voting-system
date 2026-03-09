@@ -23,5 +23,28 @@ class Voteservice:
           self.vote_repository = vote_repository
 
 
-      def vote(self):
-           pass
+      def vote(self, poll_public_id: str, option_id: str, user_id: str) -> Vote:
+           
+            poll = self.poll_repository.get_by_public_id(poll_public_id)
+            if not poll:
+                raise ValueError("Poll not found")
+
+            if not poll.is_active():
+                raise ValueError("Poll is not active")
+
+            if not poll.has_option(option_id):
+                raise ValueError("Option not found in the poll")
+
+            if self.vote_repository.has_user_voted(poll_public_id, user_id):
+                raise ValueError("User has already voted in this poll")
+
+            vote = Vote(
+                id="generated_vote_id",
+                poll_id=poll_public_id,
+                option_id=option_id,
+                user_id=user_id,
+                created_at=datetime.now()
+            )
+
+            self.vote_repository.save(vote)
+            return vote

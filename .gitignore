@@ -3,6 +3,8 @@ __pycache__/
 .env
 venv/
 
+polls.db
+
 node_modules/
 build/
 
