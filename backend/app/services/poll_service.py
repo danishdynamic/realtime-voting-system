@@ -30,7 +30,7 @@ class PollService:
         option_entities = []
 
 
-        for test in options:
+        for text in options:
             option_entities.append(
                 Option(
                     id = str(uuid.uuid4()),
