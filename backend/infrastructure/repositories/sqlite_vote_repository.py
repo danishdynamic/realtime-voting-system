@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from typing import List
 
-from ...backend.app.repositories.vote_repository import VoteRepository
-from ...backend.app.repositories.vote_repository import Vote
+from app.repositories.vote_repository import VoteRepository
+from app.repositories.vote_repository import Vote
 
 from ..models.vote_model import VoteModel
 from sqlalchemy.exc import SQLAlchemyError
@@ -67,7 +67,7 @@ class SQLiteVoteRepository(VoteRepository):
                 poll_id=str(v.poll_id),
                 option_id=str(v.option_id),
                 user_id=str(v.user_id),
-                created_at=v.created_at.isoformat()
+                created_at=v.created_at
                 )
             )
 

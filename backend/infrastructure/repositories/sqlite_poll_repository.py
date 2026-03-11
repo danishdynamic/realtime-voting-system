@@ -1,8 +1,9 @@
 from sqlalchemy.orm import Session
-from ...backend.app.repositories.poll_repository import PollRepository
-from ...backend.app.repositories.poll_repository import Poll
+from app.repositories.poll_repository import PollRepository
+from app.repositories.vote_repository import VoteRepository
 from ..models.poll_model import PollModel
 from datetime import datetime
+from app.domain.entities.poll import Poll
 
 
 
@@ -31,9 +32,9 @@ class SqlitePollRepository(PollRepository):
                 question=str(poll_model.question),
                 created_by=str(poll_model.created_by),
                 options=[],
-                start_time=poll_model.start_time.isoformat(),
-                end_time=poll_model.end_time.isoformat(),
-                created_at=poll_model.created_at.isoformat()
+                start_time=poll_model.start_time,
+                end_time=poll_model.end_time,
+                created_at=poll_model.created_at
                     )
      
     # implementing exists() method from PollRepository interface
@@ -82,9 +83,9 @@ class SqlitePollRepository(PollRepository):
                     question=str(p.question),
                     created_by=str(p.created_by),
                     options=[],
-                    start_time=p.start_time.isoformat(),
-                    end_time=p.end_time.isoformat(),
-                    created_at=p.created_at.isoformat()
+                    start_time=p.start_time,
+                    end_time=p.end_time,
+                    created_at=p.created_at
                 )
                 for p in polls
             ]
