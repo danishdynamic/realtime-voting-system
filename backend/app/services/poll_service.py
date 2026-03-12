@@ -66,6 +66,13 @@ class PollService:
     def list_active_polls(self):
 
         return self.poll_repository.list_active_polls()
+
+    # to return all active polls 
+
+    def get_active_polls(self):
+        return self.poll_repository.list_active_polls()
+    
+    
     
 
 

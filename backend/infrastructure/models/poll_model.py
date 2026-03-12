@@ -1,4 +1,5 @@
 from sqlalchemy import Column, String, DateTime
+from sqlalchemy.orm import relationship
 from ..db.database import Base
 
 class PollModel(Base):
@@ -14,3 +15,4 @@ class PollModel(Base):
     end_time = Column(DateTime, nullable=False)
 
     created_at = Column(DateTime, nullable=False)
+    options = relationship("OptionModel", back_populates="poll", cascade="all, delete-orphan")
