@@ -1,10 +1,63 @@
-from flask import Blueprint
+from flask import Blueprint, jsonify, request
+from datetime import datetime
+from app.container import get_poll_service
 
 api_blueprint = Blueprint("api", __name__)
 
-#adding a health check 
+#@api_blueprint.route("/health", methods = ["GET"])
 
-@api_blueprint.route("/health", methods = ["GET"])
-def health():
+#adding a health check method
 
-    return {"status" : "ok"}
+#def health():
+
+#return {"status" : "ok"}
+
+@api_blueprint.route("/polls", methods=["POST"])
+def create_poll():
+
+    data = request.get_json()
+
+    poll_service = get_poll_service()
+
+    question = data["question"]
+    options = data["options"]
+    created_by = data["created_by"]
+
+    start_time = datetime.fromisoformat(data["start_time"])
+    end_time = datetime.fromisoformat(data["end_time"])
+
+    poll = poll_service.create_poll(
+        question=question,
+        options=options,
+        created_by=created_by,
+        start_time=start_time,
+        end_time=end_time
+    )
+
+    return jsonify({
+        "poll_id": poll.public_id,
+        "question": poll.question,
+        "options": [o.text for o in poll.options]
+    })
+
+# get method for active polls
+
+@api_blueprint.route("/polls", methods=["GET"])
+def get_polls():
+
+    poll_service = get_poll_service()
+
+    polls = poll_service.get_active_polls()
+
+    result = []
+
+    for poll in polls:
+        result.append({
+            "poll_id": poll.public_id,
+            "question": poll.question,
+            "options": [o.text for o in poll.options],
+            "start_time": poll.start_time.isoformat(),
+            "end_time": poll.end_time.isoformat()
+        })
+
+    return jsonify(result)
