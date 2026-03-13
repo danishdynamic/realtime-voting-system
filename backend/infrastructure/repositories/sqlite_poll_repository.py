@@ -29,16 +29,20 @@ class SqlitePollRepository(PollRepository):
             for o in poll_model.options
         ]
         
-        return Poll(
-            id=str(poll_model.id),
-            public_id=str(poll_model.public_id),
-            question=str(poll_model.question),
-            created_by=str(poll_model.created_by),
-            options=options,
-            start_time=poll_model.start_time,
-            end_time=poll_model.end_time,
-            created_at=poll_model.created_at
-        )
+        try:
+            return Poll(
+                id=str(poll_model.id),
+                public_id=str(poll_model.public_id),
+                question=str(poll_model.question),
+                created_by=str(poll_model.created_by),
+                options=options,
+                start_time=poll_model.start_time,
+                end_time=poll_model.end_time,
+                created_at=poll_model.created_at
+            )
+        except ValueError as e:
+                print(f"Error converting poll_model to Poll: {e}")
+                return None
 
     def list_active_polls(self) -> List[Poll]:
         now = datetime.now()
@@ -61,21 +65,27 @@ class SqlitePollRepository(PollRepository):
             ]
 
             # Append to list INSIDE the loop
-            result.append(
-                Poll(
-                    id=str(p.id),
-                    public_id=str(p.public_id),
-                    question=str(p.question),
-                    created_by=str(p.created_by),
-                    options=domain_options,
-                    start_time=p.start_time,
-                    end_time=p.end_time,
-                    created_at=p.created_at
-                )
-            )
+            #result.append(
+            try:
+                valid_poll =Poll(
+                        id=str(p.id),
+                        public_id=str(p.public_id),
+                        question=str(p.question),
+                        created_by=str(p.created_by),
+                        options=domain_options,
+                        start_time=p.start_time,
+                        end_time=p.end_time,
+                        created_at=p.created_at
+                    )
+                result.append(valid_poll)
+            except ValueError as e:
+                print(f"Error converting poll_model to Poll:{p.id} : {e}")
 
         # Return OUTSIDE the loop
         return result
+    
+
+    # implenting save() method from PollRepository interface
 
     def save(self, poll: Poll):
         poll_model = PollModel(
@@ -88,6 +98,15 @@ class SqlitePollRepository(PollRepository):
             created_at=poll.created_at
         )
         self.db.add(poll_model)
+
+        for option in poll.options:
+            option_model = OptionModel(
+                id=option.id,
+                poll_id=poll.id,
+                text=option.text
+            )
+            self.db.add(option_model)
+            
         self.db.commit()
 
     # implementing exists() method from PollRepository interface

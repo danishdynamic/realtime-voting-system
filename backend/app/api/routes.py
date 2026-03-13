@@ -1,16 +1,14 @@
 from flask import Blueprint, jsonify, request
 from datetime import datetime
-from app.container import get_poll_service
+from app.container import get_poll_service, get_vote_service
 
 api_blueprint = Blueprint("api", __name__)
 
-#@api_blueprint.route("/health", methods = ["GET"])
-
 #adding a health check method
+@api_blueprint.route("/health", methods=["GET"])
+def health():
 
-#def health():
-
-#return {"status" : "ok"}
+  return {"status" : "ok"}
 
 @api_blueprint.route("/polls", methods=["POST"])
 def create_poll():
@@ -37,7 +35,11 @@ def create_poll():
     return jsonify({
         "poll_id": poll.public_id,
         "question": poll.question,
-        "options": [o.text for o in poll.options]
+        "options": [
+           {
+               "id": o.id,
+               "text": o.text
+           }  for o in poll.options]
     })
 
 # get method for active polls
@@ -55,9 +57,28 @@ def get_polls():
         result.append({
             "poll_id": poll.public_id,
             "question": poll.question,
-            "options": [o.text for o in poll.options],
+            "options": [{
+                "id": o.id,
+                "text": o.text
+            } for o in poll.options],
             "start_time": poll.start_time.isoformat(),
             "end_time": poll.end_time.isoformat()
         })
 
     return jsonify(result)
+
+# endpoint for voting on a poll i.e options of a poll and user id will be sent in the request body and poll id will be sent in the url path
+
+@api_blueprint.route("/polls/<public_id>/vote", methods=["POST"])
+def vote(public_id):
+     
+     data = request.json
+
+     option_id = data.get("option_id")
+     user_id = data.get("user_id")
+
+     vote_service = get_vote_service()
+
+     vote_service.vote(public_id, option_id, user_id)
+
+     return jsonify({"message": "Vote cast successfully"})
