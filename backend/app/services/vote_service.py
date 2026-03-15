@@ -15,12 +15,14 @@ from datetime import datetime
 from ..domain.entities.vote import Vote
 from ..repositories.poll_repository import PollRepository
 from ..repositories.vote_repository import VoteRepository
+from ..producers.vote_producer import VoteProducer
 
 class Voteservice:
       
-      def __init__(self, poll_repository: PollRepository, vote_repository: VoteRepository):
+      def __init__(self, poll_repository: PollRepository, vote_repository: VoteRepository, vote_producer: VoteProducer):
           self.poll_repository = poll_repository
           self.vote_repository = vote_repository
+          self.vote_producer = vote_producer
 
 
       def vote(self, poll_public_id: str, option_id: str, user_id: str) -> Vote:

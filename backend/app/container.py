@@ -8,6 +8,8 @@ from app.services.vote_service import Voteservice
 
 from app.services.poll_service import PollService
 
+from app.producers.vote_producer import VoteProducer
+
 
 
 def get_vote_service():
@@ -17,7 +19,10 @@ def get_vote_service():
     poll_repo = SqlitePollRepository(db)
     vote_repo = SQLiteVoteRepository(db)
 
-    vote_service = Voteservice(poll_repo, vote_repo)
+    vote_producer = VoteProducer()
+
+    vote_service = Voteservice(poll_repo, vote_repo, vote_producer)
+    
     return vote_service
 
 
@@ -28,3 +33,4 @@ def get_poll_service():
     poll_repo = SqlitePollRepository(db)
 
     return PollService(poll_repo)
+
