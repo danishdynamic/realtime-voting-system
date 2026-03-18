@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from datetime import datetime
 from app.container import get_poll_service, get_vote_service
+from backend.infrastructure.redis.redis_client import redis_client
 
 api_blueprint = Blueprint("api", __name__)
 
@@ -82,3 +83,21 @@ def vote(public_id):
      vote_service.vote(public_id, option_id, user_id)
 
      return jsonify({"message": "Vote cast successfully"})
+
+
+@api_blueprint.route("/polls/<poll_id>/results", methods=["GET"])
+def get_results(poll_id):
+
+    key = f"poll:{poll_id}"
+
+    results : dict = redis_client.hgetall(key)
+
+    results= {k: int(v) for k, v in results.items()}
+
+    return jsonify({
+        "poll_id": poll_id,
+        "results": results
+    })
+
+
+
