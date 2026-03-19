@@ -1,3 +1,5 @@
+## Architecture Overview
+
 Client (React Dashboard)
       │
       ▼
