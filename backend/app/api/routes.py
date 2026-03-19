@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request
 from datetime import datetime
-from app.container import get_poll_service, get_vote_service
+from backend.app.container import get_poll_service, get_vote_service
 from backend.infrastructure.redis.redis_client import redis_client
-from app.api.app import socketio_instance
+from backend.app.api.extensions import socketio
 
 api_blueprint = Blueprint("api", __name__)
 

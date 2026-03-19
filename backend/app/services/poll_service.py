@@ -2,9 +2,9 @@ from datetime import datetime
 import uuid
 from typing import List
 
-from app.domain.entities.poll import Poll
-from app.domain.entities.option import Option
-from app.repositories.poll_repository import PollRepository
+from backend.app.domain.entities.poll import Poll
+from backend.app.domain.entities.option import Option
+from backend.app.repositories.poll_repository import PollRepository
 
 class PollService:
     

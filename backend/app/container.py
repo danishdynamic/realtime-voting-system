@@ -1,14 +1,14 @@
 
-from infrastructure.db.database import SessionLocal
+from backend.infrastructure.db.database import SessionLocal
 
-from infrastructure.repositories.sqlite_poll_repository import SqlitePollRepository
-from infrastructure.repositories.sqlite_vote_repository import SQLiteVoteRepository
+from backend.infrastructure.repositories.sqlite_poll_repository import SqlitePollRepository
+from backend.infrastructure.repositories.sqlite_vote_repository import SQLiteVoteRepository
 
-from app.services.vote_service import Voteservice
+from backend.app.services.vote_service import Voteservice
 
-from app.services.poll_service import PollService
+from backend.app.services.poll_service import PollService
 
-from app.producers.vote_producer import VoteProducer
+from backend.app.producers.vote_producer import VoteProducer
 
 
 

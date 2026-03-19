@@ -1,4 +1,4 @@
-from app.container import get_vote_service
+from backend.app.container import get_vote_service
 
 vote_service = get_vote_service()
 

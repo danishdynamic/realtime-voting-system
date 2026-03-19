@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import socket from "./socket";
-import { getResults, vote } from "./api";
-import LiveChart from "./components/LiveChart";
+import socket from "../socket";
+import { getResults, vote } from "../api";
+import LiveChart from "../components/LiveChart";
 
 function PollDetails({ pollId }) {
   const [results, setResults] = useState({});

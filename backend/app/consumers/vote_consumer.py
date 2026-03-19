@@ -1,7 +1,7 @@
 from kafka import KafkaConsumer
 import json
 from backend.infrastructure.redis.redis_client import redis_client
-from app.api.app import socketio_instance
+from backend.app.api.app import socketio_instance
 
 # Initialize the Kafka consumer, this connects to the Kafka broker and sets up the deserializer for the messages
 

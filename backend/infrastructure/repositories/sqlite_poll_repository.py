@@ -1,11 +1,11 @@
 from sqlalchemy.orm import Session, joinedload # Added joinedload
-from app.repositories.poll_repository import PollRepository
-from app.repositories.vote_repository import VoteRepository
+from backend.app.repositories.poll_repository import PollRepository
+from backend.app.repositories.vote_repository import VoteRepository
 from ..models.poll_model import PollModel
 from datetime import datetime
-from app.domain.entities.poll import Poll
-from infrastructure.models.option_model import OptionModel
-from app.domain.entities.option import Option
+from backend.app.domain.entities.poll import Poll
+from backend.infrastructure.models.option_model import OptionModel
+from backend.app.domain.entities.option import Option
 from typing import List
 
 class SqlitePollRepository(PollRepository):

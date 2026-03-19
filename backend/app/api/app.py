@@ -1,9 +1,8 @@
 from flask import Flask
-from flask_socketio import SocketIO
-from app.api.routes import api_blueprint
+from backend.app.api.extensions import socketio
+from backend.app.api.routes import api_blueprint
 
-socketio_instance = SocketIO(cors_allowed_origins="*")
-
+socketio_instance = socketio
 
 def create_app():
     app = Flask(__name__)
