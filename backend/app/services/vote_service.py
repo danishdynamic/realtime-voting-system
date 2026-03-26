@@ -49,4 +49,5 @@ class Voteservice:
             )
 
             self.vote_repository.save(vote)
+            self.vote_producer.send_vote({"poll_id": poll_public_id, "option_id": option_id})
             return vote

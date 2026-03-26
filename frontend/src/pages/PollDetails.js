@@ -5,12 +5,21 @@ import LiveChart from "../components/LiveChart";
 
 function PollDetails({ pollId }) {
   const [results, setResults] = useState({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // initial load
-    getResults(pollId).then(res => setResults(res.data.results));
+    // initial load from flask api
+    getResults(pollId).then(data => {
+      setResults(data.results || data || {});
+      setLoading(false);
+    })
 
-    // live updates
+    .catch(err => {
+      console.error("Error fetching results:", err);
+      setLoading(false);
+    });
+
+    // Listen for Kafka -> Socket.io real-time updates
     socket.on("vote_update", (data) => {
       if (data.poll_id === pollId) {
         setResults(data.results);
@@ -21,16 +30,31 @@ function PollDetails({ pollId }) {
   }, [pollId]);
 
   const handleVote = (optionId) => {
-    vote(pollId, optionId);
+    vote(pollId, optionId).catch(err => {
+      console.error("Error voting:", err);
+    });
   };
 
   return (
-    <div>
+    <div style={{ padding: "20px" , textAlign: "center"}}>
       <h2>Poll: {pollId}</h2>
 
-      {/* Replace with real options later */}
-      <button onClick={() => handleVote("A")}>Vote A</button>
-      <button onClick={() => handleVote("B")}>Vote B</button>
+     <div style={{ marginBottom: "20px" }}>
+        {/* ✅ DYNAMIC BUTTONS: Loop through the keys in your results object */}
+        {Object.keys(results).length > 0 ? (
+          Object.keys(results).map((optionName) => (
+            <button
+              key={optionName}
+              onClick={() => handleVote(optionName)}
+              style={{ margin: "10px", padding: "10px 20px", cursor: "pointer" }}
+            >
+              Vote {optionName}
+            </button>
+          ))
+        ) : (
+          <p>No options found for this poll.</p>
+        )}
+      </div>
 
       <LiveChart results={results} />
     </div>

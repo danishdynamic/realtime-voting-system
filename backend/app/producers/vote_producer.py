@@ -1,7 +1,8 @@
 from kafka import KafkaProducer
 import json
+from abc import ABC, abstractmethod
 
-class VoteProducer:
+class VoteProducer(ABC):
     
     # Initialize the Kafka producer, this connects to the Kafka broker and sets up the serializer for the messages
     def __init__(self):
@@ -14,3 +15,9 @@ class VoteProducer:
     def publish_vote(self, event:dict):
         self.producer.send('vote_events', event)
         self.producer.flush()  # Ensure the message is sent immediately
+
+    def send_vote(self, vote_data:dict):
+        '''Send a vote message to the message broker (kafka)'''
+        self.producer.send('vote_events', vote_data)
+        self.producer.flush() 
+        print(f"DEBUG: Sent vote to Kafka: {vote_data}")

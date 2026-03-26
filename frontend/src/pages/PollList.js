@@ -7,9 +7,12 @@ function PollList({ onSelect }) {
 
     useEffect(() => {
         getPolls()
-            .then(res => {
+            .then((data) => {
                 // Ensure res.polls exists before setting state
-                setPolls(res.polls || []);
+                console.log("API Response:", data);
+
+                const pollsData = data.polls || data || [];
+                setPolls(pollsData);
                 setLoading(false);
             })
             .catch(err => {
@@ -26,10 +29,10 @@ function PollList({ onSelect }) {
             {polls.length === 0 ? (
                 <p>No active polls found.</p>
             ) : (
-                polls.map((p) => (
-                    <div key={p.poll_id} className="poll-item">
+                 polls.map((p) => (
+                    <div key={p.public_id || p.id} className="poll-item">
                         <h3>{p.question}</h3>
-                        <button onClick={() => onSelect(p.poll_id)}>
+                        <button onClick={() => onSelect(p.public_id || p.id)}>
                             Open Poll
                         </button>
                     </div>
