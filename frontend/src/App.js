@@ -1,40 +1,41 @@
-import React, { useEffect, useState } from "react";
-import socket from "./socket";
-import { getResults, vote } from "./api";
-import LiveChart from "./components/LiveChart";
+import React, { useState } from "react";
+import PollList from "./pages/PollList";
+import PollDetails from "./pages/PollDetails";
+import "./App.css"; 
 
-function PollDetails({ pollId }) {
-  const [results, setResults] = useState({});
+function App() {
+  const [selectedPollId, setSelectedPollId] = useState(null);
 
-  useEffect(() => {
-    // initial load
-    getResults(pollId).then(res => setResults(res.data.results));
+  const handlePollSelect = (publicId) => {
+    console.log("DEBUG: Poll Selected ->", publicId);
+    setSelectedPollId(publicId);
+  };
 
-    // live updates
-    socket.on("vote_update", (data) => {
-      if (data.poll_id === pollId) {
-        setResults(data.results);
-      }
-    });
-
-    return () => socket.off("vote_update");
-  }, [pollId]);
-
-  const handleVote = (optionId) => {
-    vote(pollId, optionId);
+  const handleBackToList = () => {
+    setSelectedPollId(null);
   };
 
   return (
-    <div>
-      <h2>Poll: {pollId}</h2>
+    <div className="App" style={{ padding: "20px" }}>
+      <header style={{ textAlign: "center", marginBottom: "30px" }}>
+        <h1>Real-Time Voting System</h1>
+      </header>
 
-      {/* Replace with real options later */}
-      <button onClick={() => handleVote("A")}>Vote A</button>
-      <button onClick={() => handleVote("B")}>Vote B</button>
-
-      <LiveChart results={results} />
+     
+      <main style={{ maxWidth: "800px", margin: "0 auto" }}>
+      {selectedPollId === null ? (
+        <PollList onSelect={(id) => handlePollSelect(id)} />
+      ) : (
+        <div>
+          <button onClick={handleBackToList} style={{ marginBottom: "20px" }}>
+            Back to List
+          </button>
+          <PollDetails pollId={selectedPollId} />
+        </div>
+      )}
+      </main>
     </div>
   );
 }
 
-export default PollDetails;
+export default App;

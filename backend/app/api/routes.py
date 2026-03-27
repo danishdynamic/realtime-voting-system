@@ -78,27 +78,35 @@ def vote(public_id):
 
      option_id = data.get("option_id")
      user_id = data.get("user_id")
+     option_text = data.get("option_text")
 
      vote_service = get_vote_service()
 
-     vote_service.vote(public_id, option_id, user_id)
+     vote_service.vote(public_id, option_id, user_id,option_text=option_text )
 
      return jsonify({"message": "Vote cast successfully"})
 
 
 @api_blueprint.route("/polls/<poll_id>/results", methods=["GET"])
 def get_results(poll_id):
-
+    # 1. Try to get real-time data from Redis
     key = f"poll:{poll_id}"
+    redis_results = redis_client.hgetall(key) or {}
+    
+    # 2. Convert Redis bytes to a clean dictionary
+    results = {k.decode() if isinstance(k, bytes) else k: int(v) for k, v in redis_results.items()}
 
-    results  = redis_client.hgetall(key) or {}
-
-    results= {k.decode() if isinstance(k, bytes) else k: int(v) for k, v in results.items()}
+    # 3. IF REDIS IS EMPTY: Fetch options from DB so buttons appear
+    if not results:
+        poll_service = get_poll_service()
+        # Find the poll by public_id
+        poll = poll_service.get_poll(poll_id)
+        if poll:
+            # Create a dictionary with 0 votes for every option
+            results = {o.text: 0 for o in poll.options}
 
     return jsonify({
         "poll_id": poll_id,
         "results": results
     })
-
-
 

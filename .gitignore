@@ -3,7 +3,12 @@ __pycache__/
 .env
 venv/
 
-backend/polls.db
+# Databases
+*.db
+*.sqlite3
+*.sqlite
+backend/app/infrastructure/db/*.db
+backend/infrastructure/database/*.db
 
 node_modules/
 build/

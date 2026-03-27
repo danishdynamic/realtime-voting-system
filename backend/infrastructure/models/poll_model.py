@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 from ..db.database import Base
 
@@ -6,7 +6,7 @@ class PollModel(Base):
 
     __tablename__ = "polls"
 
-    id = Column(String, primary_key=True, index=True)
+    id = Column(Integer , primary_key=True, index=True, autoincrement= True)
     public_id = Column(String, unique=True, index=True, nullable=False)
     question = Column(String, nullable=False)
     created_by = Column(String, nullable=False)
