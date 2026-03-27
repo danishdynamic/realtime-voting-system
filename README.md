@@ -238,6 +238,8 @@ services:
 ```
   
 ### 🧠 2. Backend Setup
+
+>> Run ``` bash py -m backend.infrastructure.database.seed ``` to initialize the local database i.e seed_db.py.
   
 ```
 cd backend
@@ -366,3 +368,4 @@ git commit -m "Add: your feature description"
 git push origin feature/your-feature-name
 ```
 - Open a Pull Request to merge your branch into ```main```
+

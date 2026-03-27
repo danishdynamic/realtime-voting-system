@@ -1,28 +1,25 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
-
-#Define dataclass for voe entitiy 
+from typing import Any, Optional
 
 @dataclass
 class Vote:
-    id : str
-    poll_id: str
-    option_id: str
+    poll_id: Any  # Changed to Any to allow int or str
+    option_id: Any # Changed to Any to allow int or str
     user_id: str
-    created_at: datetime
+    created_at: datetime = field(default_factory=datetime.now)
+    id: Optional[Any] = None  # id is now optional and can be any type
 
     def __post_init__(self):
-        
-        if not self.id.strip():
+        # We use str() here so .strip() doesn't crash if we pass an int
+        if self.id is not None and not str(self.id).strip():
             raise ValueError("Vote Id cannot be empty")
 
-        if not self.poll_id.strip():
-            raise ValueError ("Poll Id cannot be empty")
+        if not str(self.poll_id).strip():
+            raise ValueError("Poll Id cannot be empty")
         
-        if not self.option_id.strip():
+        if not str(self.option_id).strip():
             raise ValueError("Option Id cannot be empty")
         
         if not self.user_id.strip():
             raise ValueError("User Id cannot be empty")
-        
-

@@ -9,8 +9,20 @@ function PollDetails({ pollId }) {
 
   useEffect(() => {
     // initial load from flask api
+    console.log("PollDetails mounted with ID:" , pollId)
+    
+    if (!pollId){
+      console.error("No PollID provided to PollDetails")
+      return;
+    }
+
+
     getResults(pollId).then(data => {
-      setResults(data.results || data || {});
+      console.log("Fetched esults Data", data);
+
+      const finalResults = data.results || data || {};
+
+      setResults(finalResults);
       setLoading(false);
     })
 
@@ -29,11 +41,21 @@ function PollDetails({ pollId }) {
     return () => socket.off("vote_update");
   }, [pollId]);
 
-  const handleVote = (optionId) => {
-    vote(pollId, optionId).catch(err => {
-      console.error("Error voting:", err);
-    });
-  };
+  // 🛑 Safety check: If still loading, stop here and show message
+  if (loading) return <p>Loading poll results for {pollId}...</p>;
+
+  // 1. The function only needs the Name
+  const handleVote = (optionName) => {
+  // We pass optionName twice: once as the 'id' and once as the 'text'
+  // Your backend is now smart enough to use the text to find the right Redis key!
+      vote(pollId, optionName, optionName)
+      .then(() => {
+        console.log(`✅ Vote cast for: ${optionName}`);
+      })
+      .catch(err => {
+        console.error("❌ Error voting:", err);
+      });
+  };  
 
   return (
     <div style={{ padding: "20px" , textAlign: "center"}}>
