@@ -17,7 +17,7 @@ jobs:
         ports:
           - 6379:6379
       zookeeper:
-        image: bitnami/zookeeper:3.9.2
+        image: bitnami/zookeeper:3.9.1
         ports:
           - 2181:2181
         env:
