@@ -344,6 +344,12 @@ REACT_APP_WS_URL=ws://localhost:8000
 
 - Monitoring (Prometheus + Grafana)
 
+### 👿 ScreenShots
+
+<img width="1350" height="1042" alt="Screenshot 2026-03-27 201351" src="https://github.com/user-attachments/assets/431e4e8e-5888-45d8-bf3d-61661f9a507a" />
+
+
+<img width="986" height="152" alt="Screenshot 2026-03-27 201439" src="https://github.com/user-attachments/assets/61a02ec1-4202-48bd-a2c3-9b7708a6499d" />
 
 ### 🤝 Contributing Guidelines
 
