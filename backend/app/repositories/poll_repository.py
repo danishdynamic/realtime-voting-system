@@ -26,5 +26,11 @@ class PollRepository(ABC):
         """Check if a poll exists."""
         pass
 
+    @abstractmethod
+    def list_all_polls(self) -> List[Poll]:
+        """Return all polls regardless of status."""
+        pass
+
+
 
     

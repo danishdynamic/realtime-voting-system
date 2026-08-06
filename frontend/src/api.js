@@ -1,11 +1,17 @@
-import axios from "axios";
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
-const API = "http://localhost:5000";
+export const getResults = (pollId) =>
+  fetch(`${API_URL}/polls/${pollId}/results`).then((res) => res.json());
 
-export const getPolls = () => axios.get(`${API}/polls`).then(res => res.data);
+export const getPoll = (pollId) =>
+  fetch(`${API_URL}/polls/${pollId}`).then((res) => res.json());
 
-export const getResults = (pollId) => axios.get(`${API}/polls/${pollId}/results`).then(res => res.data);
-
-export const vote = (pollId, optionId, optionText) => axios.post(`${API}/polls/${pollId}/vote`, {
-  option_id: optionId, option_text: optionText, user_id: "user123" // replace with actual user ID if needed
-});
+export const vote = (pollId, optionId, optionText) =>
+  fetch(`${API_URL}/polls/${pollId}/vote`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ option_id: optionId, option_text: optionText, user_id: "user123" }),
+  }).then((res) => {
+    if (!res.ok) throw res;
+    return res.json();
+  });

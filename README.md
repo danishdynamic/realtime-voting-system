@@ -28,45 +28,46 @@ A distributed, event-driven real-time voting platform designed for high throughp
 
 ### 🏗️ High-Level Architecture
 
-        ┌──────────────┐
-        │   Frontend   │
-        │   (React)    │
-        └──────┬───────┘
-               │ HTTP (Vote)
-               ▼
-        ┌──────────────┐
-        │  Flask API   │
-        │ (Producer)   │
-        └──────┬───────┘
-               │ Publish Event
-               ▼
-        ┌──────────────┐
-        │    Kafka     │
-        │  (Broker)    │
-        └──────┬───────┘
-               │ Consume
-               ▼
-        ┌──────────────┐
-        │  Consumers   │
-        └──────┬───────┘
-               │ Update
-               ▼
-        ┌──────────────┐
-        │    Redis     │
-        │ (Cache + PS) │
-        └──────┬───────┘
-               │ Publish
-               ▼
-        ┌──────────────┐
-        │ WebSocket    │
-        │   Server     │
-        └──────┬───────┘
-               │ Push
-               ▼
-        ┌──────────────┐
-        │   Frontend   │
-        └──────────────┘
 
+```mermaid
+graph TD
+    subgraph ClientLayer ["Client Layer"]
+        REACT["Frontend<br/>(React)"]
+    end
+
+    subgraph Ingestion ["Ingestion & Queue"]
+        FLASK["Flask API<br/>(Producer)"]
+        KAFKA["Kafka<br/>(Broker)"]
+    end
+
+    subgraph Processing ["Processing & Storage"]
+        CONSUMERS["Consumers"]
+        REDIS[("Redis<br/>(Cache + PS)")]
+    end
+
+    subgraph Realtime ["Real-Time Delivery"]
+        WS["WebSocket<br/>Server"]
+    end
+
+    %% Flow Connections
+    REACT -->|"HTTP (Vote)"| FLASK
+    FLASK -->|"Publish Event"| KAFKA
+    KAFKA -->|"Consume"| CONSUMERS
+    CONSUMERS -->|"Update"| REDIS
+    REDIS -->|"Publish"| WS
+    WS -->|"Push"| REACT
+
+    %% Styling
+    classDef client fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#fff
+    classDef service fill:#1e293b,stroke:#818cf8,stroke-width:2px,color:#fff
+    classDef streaming fill:#1e293b,stroke:#fbbf24,stroke-width:2px,color:#fff
+    classDef storage fill:#1e293b,stroke:#f43f5e,stroke-width:2px,color:#fff
+
+    class REACT client
+    class FLASK,CONSUMERS,WS service
+    class KAFKA streaming
+    class REDIS storage
+```
 
 ### 🔍 Low-Level Design (LLD)
 

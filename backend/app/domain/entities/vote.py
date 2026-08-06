@@ -7,7 +7,7 @@ class Vote:
     poll_id: Any  # Changed to Any to allow int or str
     option_id: Any # Changed to Any to allow int or str
     user_id: str
-    created_at: datetime = field(default_factory=datetime.now)
+    created_at: Optional[datetime] = None
     id: Optional[Any] = None  # id is now optional and can be any type
 
     def __post_init__(self):
