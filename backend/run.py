@@ -1,6 +1,6 @@
 import os
-from backend.app.api.app import create_app
-from backend.app.api.extensions import socketio
+from app import create_app
+from extensions import socketio
 from backend.infrastructure.db.database import engine, Base
 
 # 1. Create the Flask Application instance

@@ -1,5 +1,5 @@
 from flask import Flask
-from backend.app.api.extensions import socketio
+from extensions import socketio
 from backend.app.api.routes import api_blueprint
 from flask_cors import CORS
 
