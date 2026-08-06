@@ -1,35 +1,41 @@
-# 🗳️ Real-Time Voting System 
+# 🗳️ Real Time Voting System
 
-A distributed, event-driven real-time voting platform designed for high throughput, low latency, and horizontal scalability.
+A distributed, event driven real time voting platform designed for high throughput ingestion, sub second latency, and horizontal scalability.
 
-<img width="986" height="152" alt="Screenshot 2026-03-27 201439" src="https://github.com/user-attachments/assets/61a02ec1-4202-48bd-a2c3-9b7708a6499d" />
+---
 
-## 🎯 Problem Statement
+## 📖 Quick Links & Documentation
 
-- Design a system that:
+* ⚙️ **[Backend Documentation](./backend/README.md)** – Detailed Flask API contracts, Kafka consumer logic, and DB migrations.
+* 🎨 **[Frontend Documentation](./frontend/README.md)** – React setup, state management, UI components, and WebSocket hooks.
+* 🛠️ **[Architecture Docs](./docs/architecture.md)** – Deep dive design choices, throughput calculations, and reliability considerations.
 
-- Handles high-frequency concurrent votes
+---
 
-- Provides real-time updates to users
+## 🎯 System Objectives
 
-- Scales to millions of users
+* **High Throughput:** Non-blocking vote ingestion capable of buffering spikes using Kafka.
+* **Real-Time Delivery:** Instant UI updates via WebSockets powered by Redis Pub/Sub.
+* **Fault Tolerance:** At least once message processing with decoupled producer/consumer components.
+* **Scalability:** Fully containerized components ready for horizontal scaling.
 
-- Ensures fault tolerance and reliability
+---
 
-### 🚀 Tech Stack
+## 🚀 Tech Stack
 
-| Layer	| Technology
-|-------|------------
-| Frontend	| React
-| API Layer	| Flask
-| Messaging	| Kafka
-| Processing	| Kafka Consumers
-| Cache/Store	| Redis
-| Realtime	| WebSockets
-| Infra	| Docker
+| Layer | Technology | Role |
+| :--- | :--- | :--- |
+| **Frontend** | React, Tailwind CSS | Client UI & real time result displays |
+| **Ingestion API** | Flask, Gunicorn | High speed, stateless vote ingestion |
+| **Message Broker** | Apache Kafka, Zookeeper | Event streaming, decoupling, & rate buffering |
+| **Worker Queue** | Python Consumers | Parallel event aggregation & state sync |
+| **Cache & Pub/Sub** | Redis | In memory count storage & WebSocket fan-out |
+| **Realtime Engine** | WebSocket Server | Sub second push notifications to UI |
+| **Orchestration** | Docker, Docker Compose | Infrastructure deployment |
 
-### 🏗️ High-Level Architecture
+---
 
+## 🏗️ High-Level Architecture
 
 ```mermaid
 graph TD
@@ -44,7 +50,7 @@ graph TD
 
     subgraph Processing ["Processing & Storage"]
         CONSUMERS["Consumers"]
-        REDIS[("Redis<br/>(Cache + PS)")]
+        REDIS[("Redis<br/>(Cache + Pub/Sub)")]
     end
 
     subgraph Realtime ["Real-Time Delivery"]
@@ -52,12 +58,12 @@ graph TD
     end
 
     %% Flow Connections
-    REACT -->|"HTTP (Vote)"| FLASK
-    FLASK -->|"Publish Event"| KAFKA
-    KAFKA -->|"Consume"| CONSUMERS
-    CONSUMERS -->|"Update"| REDIS
-    REDIS -->|"Publish"| WS
-    WS -->|"Push"| REACT
+    REACT -->|"1. HTTP POST /vote"| FLASK
+    FLASK -->|"2. Produce Event"| KAFKA
+    KAFKA -->|"3. Consume Event"| CONSUMERS
+    CONSUMERS -->|"4. Atomic INCRBY"| REDIS
+    REDIS -->|"5. Pub/Sub Event"| WS
+    WS -->|"6. Push Update"| REACT
 
     %% Styling
     classDef client fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#fff
@@ -70,26 +76,49 @@ graph TD
     class KAFKA streaming
     class REDIS storage
 ```
+---
 
-### 🔍 Low-Level Design (LLD)
+## ⚡ End-to-End Workflow
 
-🔹 1. Vote API (Flask)
+```mermaid
+sequenceDiagram
+    participant F as Frontend (React)
+    participant A as Flask API
+    participant K as Kafka Broker
+    participant C as Consumer Worker
+    participant R as Redis
+    participant W as WebSocket Server
 
->Endpoint:
+    F->>A: POST /vote (poll_id, option)
+    activate A
+    A->>K: Produce "vote_event" (Partition key: poll_id)
+    K-->>A: Ack
+    A-->>F: 202 Accepted (Non-blocking)
+    deactivate A
 
-- POST /vote
+    K->>C: Consume Event Batch
+    activate C
+    C->>R: INCRBY poll:{id}:{option}
+    C->>R: PUBLISH poll_updates
+    deactivate C
 
->Responsibilities:
-
-- Validate request
-
-- Produce event to Kafka
-
-- Return immediate response (non-blocking)
-
->Payload:
-
+    R->>W: Receive Pub/Sub
+    activate W
+    W->>F: Broadcast JSON payload via WebSockets
+    deactivate W
+    Note right of F: UI updates instantly without refresh
 ```
+---
+
+##  🛠️ System Components & Design Choices. 
+
+### 1. Flask API (Ingestion)
+
+- Design Strategy: Immediate return ($202\text{ Accepted}$) upon successfully publishing to Kafka.
+
+- Payload:
+
+```json
 {
   "user_id": "u123",
   "poll_id": "p456",
@@ -98,281 +127,72 @@ graph TD
 }
 ```
 
->🔹 2. Kafka Design
 
-- Topic: votes
+### 2. Kafka Event Streaming: 
+   
+-  Topic : ```votes```
+-  
+-  Partition Key: ```poll_id``` (Ensures strict ordering of votes per individual poll).
+ 
+### 3. Redis Data Structure
 
-- Partition Key: poll_id
+- Hash Storage: poll:{poll_id} $\rightarrow$ {"A": 120, "B": 95}
 
-- Ensures ordering per poll
+- Pub/Sub Channel: ```poll_updates```
 
->Why Kafka?
+---
 
-- Decouples services
+## Quick Start
+**Prerequisites:**
+- Docker Desktop
+- Python 3.9+
+- Node.js 18+
 
-- Handles traffic spikes
-
-- Supports replay
-
->🔹 3. Consumer Workers
-
-Responsibilities:
-
-- Consume vote events
-
-- Aggregate counts
-
-- Update Redis
-
-Scaling:
-
-- Consumer groups
-
-- Partition-based parallelism
-
-🔹 4. Redis Design
-
-Data Model:
-```
-Key: poll:{poll_id}
-Type: HASH
-
-{
-  "A": 120,
-  "B": 95
-}
-
-```
-
-Pub/Sub Channel:
-
-poll_updates
-
->🔹 5. WebSocket Server
-
-Responsibilities:
-
-- Subscribe to Redis Pub/Sub
-
-- Broadcast updates to clients
-
-### 🔄 Sequence Diagrams
-
-### 🧩 1. Vote Submission Flow
-
-``` mermaid
-sequenceDiagram
-    participant F as Frontend (React)
-    participant A as Flask API
-    participant K as Kafka Broker
-    participant C as Consumer Worker
-    participant R as Redis (Cache)
-
-    Note over F, R: Event-Driven Architecture
-    F->>A: POST /vote (poll_id, option)
-    activate A
-    A->>K: Produce "vote_event"
-    K-->>A: Ack
-    A-->>F: 202 Accepted
-    deactivate A
-
-    K->>C: Consume Event
-    activate C
-    C->>R: INCRBY poll:{id}:{option}
-    R-->>C: Update Success
-    deactivate C
-```
-
-### ⚡ 2. Real-Time Update Flow
-``` mermaid
-sequenceDiagram
-    participant R as Redis (Pub/Sub)
-    participant W as WebSocket Server
-    participant F as Frontend (React)
-
-    R->>W: Publish: poll_updated_event
-    activate W
-    W->>F: Broadcast via Socket.IO
-    deactivate W
-    Note right of F: UI Updates Automatically
-```
-
-### 🔁 3. End-to-End Flow
-
->User → React → Flask → Kafka → Consumer → Redis → WebSocket → Reactjs
-
-### ⚙️ Setup Instructions
-
-- 🐳 Prerequisites
-
-> Docker, Docker Compose, Python 3.9+ , Reactjs
-
-- 🐳 1. Start Infrastructure (Kafka + Redis)
-
-``` bash
+**1. Boot Infrastructure (Kafka & Redis)**
+```bash
 docker-compose up -d
-➤ docker-compose.yml
-version: '3.8'
-
-services:
-  zookeeper:
-    image: confluentinc/cp-zookeeper:latest
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-
-  kafka:
-    image: confluentinc/cp-kafka:latest
-    ports:
-      - "9092:9092"
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    depends_on:
-      - zookeeper
 ```
 
-``` bash
-  redis:
-    image: redis:latest
-    ports:
-      - "6379:6379"
-```
-  
-### 🧠 2. Backend Setup
+**2. Run Local Services**
+Follow the setup guides in each module directory:
+- **Backend Service Setup**
+- **Frontend Application Setup**
 
->> Run ``` bash py -m backend.infrastructure.database.seed ``` to initialize the local database i.e seed_db.py.
-  
-```
-cd backend
+---
 
-python -m venv venv
-
-source venv/bin/activate   # Windows: venv\Scripts\activate
-
-pip install -r requirements.txt
-```
-
-### ▶️ Run Backend Services
-
-### Flask API
-```
-py app.py
-```
-
-### Kafka Consumer
-```
-py consumer.py
-```
-
-### WebSocket Server
-``` 
-py websocket_server.py
-```
-
-### 🌐 3. Frontend Setup
-``` bash
-cd frontend 
-
-npm install
-npm start
-
-```
-
-### 🔌 4. Environment Variables
-``` bash
-- Backend .env
-
-KAFKA_BROKER=localhost:9092
-REDIS_HOST=localhost
-REDIS_PORT=6379
-
-- Frontend .env
-
-REACT_APP_API_URL=http://localhost:5000
-
-REACT_APP_WS_URL=ws://localhost:8000
-
-```
-
-### ✅ 5. Verify Setup
-
-- Kafka → localhost:9092 
-
-- Redis → localhost:6379
-
-- Flask → http://localhost:5000
-
-- WebSocket → ws://localhost:8000
-
-- React → http://localhost:3000 
-
-### 📈 Scalability
-
-| Component | Strategy |
-|-----------|----------|
-| Flask API | Stateless scaling |
-| Kafka | Partitioning |
-| Consumers | Consumer groups |
-| Redis | Clustering |
-| WebSocket | Horizontal scaling |
-
-### ⚠️ Bottlenecks & Solutions
-
-| Problem | Solution |
-|--------|----------|
-| Kafka lag | Increase partitions |
-| Redis overload | Sharding |
-| WebSocket scaling | Load balancer |
-| Duplicate votes | Idempotency keys |
-
-### 🔐 Reliability
-
-- At-least-once delivery (Kafka)
-
-- Retry mechanisms
-
-- Graceful failure handling
-
-### 🚀 Future Enhancements
-
-- Authentication & authorization
-
-- Rate limiting
-
-- Persistent DB (PostgreSQL)
-
-- Kubernetes deployment
-
-- Monitoring (Prometheus + Grafana)
-
-### 👿 ScreenShots
-
-<img width="1350" height="1042" alt="Screenshot 2026-03-27 201351" src="https://github.com/user-attachments/assets/431e4e8e-5888-45d8-bf3d-61661f9a507a" />
+## 📊 Default Port Allocations
 
 
-### 🤝 Contributing Guidelines
+Service | Address |Access |
+| :--- | :--- | :--- |
+| React Frontend | http://localhost:3000 | Web UI |
+| Flask API | http://localhost:5000 | REST API |
+| WebSocket Server | ws://localhost:8000 | Socket Connection |
+| Kafka Broker | localhost:9092 | Internal Queue |
+| Redis Server | localhost:6379 | Cache / PubSub |
 
-We welcome contributions to improve the Real-Time Voting System!
+---
 
-### 🚀 How to Contribute
+## 📈 Scalability & Reliability Matrix
 
-- Fork the repository
+Challenge | Architecture Solution |
+| :--- | :--- |
+| Traffic Spikes | Kafka buffers incoming votes; Flask processes non blocking requests. |
+| Database Overload | Direct updates bypass persistent DBs, writing directly to Redis in memory structures. |
+| Consumer Lag | Increase partition count on the votes topic and scale the Consumer Group workers horizontally. |
+| Duplicate Votes | Process idempotency keys inside consumer workers before persisting updates. |
 
-- Create a new branch:
-```
-git checkout -b feature/your-feature-name
-```
-- Make your changes
+---
 
-- Commit your changes:
-```
-git commit -m "Add: your feature description"
-```
-- Push to your fork:
-```
-git push origin feature/your-feature-name
-```
-- Open a Pull Request to merge your branch into ```main```
 
+## 🤝 Contributing
+
+1. Fork the project repository.
+
+2. Create your feature branch: git checkout -b feature/AmazingFeature
+
+3. Commit your updates: git commit -m 'Add some AmazingFeature'
+
+4. Push to the branch: git push origin feature/AmazingFeature
+
+5. Open a Pull Request targeting the main branch.
