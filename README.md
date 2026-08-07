@@ -10,7 +10,7 @@ A distributed, event driven real time voting platform designed for high throughp
 
 ![Screenshot](./frontend/assets/../src/assets/kafka_redis_connect.png)
 
-![Demo video](./frontend/assets/vote_demo.gif)
+![Demo video](./frontend/src/assets/vote_demo.gif)
 
 
 ---
