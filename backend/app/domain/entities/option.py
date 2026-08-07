@@ -1,10 +1,10 @@
-
+# app/domain/entities/option.py
 from dataclasses import dataclass
 
 #Define dataclass for Option entity
 @dataclass
 class Option:
-    id: int
+    id: str
     poll_id: str
     text: str
 

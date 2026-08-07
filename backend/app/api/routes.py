@@ -1,5 +1,8 @@
+# app/api/routes.py
+from datetime import datetime, timezone
+from dateutil import parser
 from flask import Blueprint, jsonify, request
-from datetime import datetime
+
 from backend.app.container import get_poll_service, get_vote_service
 from backend.infrastructure.redis.redis_client import redis_client
 
@@ -9,12 +12,14 @@ api_blueprint = Blueprint("api", __name__)
 
 # ─── Health Check ───────────────────────────────────────────────────────────
 
+
 @api_blueprint.route("/health", methods=["GET"])
 def health():
     return {"status": "ok"}
 
 
 # ─── Create Poll ────────────────────────────────────────────────────────────
+
 
 @api_blueprint.route("/polls", methods=["POST"])
 def create_poll():
@@ -25,25 +30,34 @@ def create_poll():
     options = data["options"]
     created_by = data["created_by"]
 
-    start_time = datetime.fromisoformat(data["start_time"])
-    end_time = datetime.fromisoformat(data["end_time"])
+    # Parse as UTC, then make naive for SQLite storage
+    start_time = datetime.fromisoformat(data["start_time"].replace("Z", "+00:00"))
+    end_time = datetime.fromisoformat(data["end_time"].replace("Z", "+00:00"))
+
+     # Convert UTC to local naive for SQLite (or keep as UTC naive)
+    start_time = start_time.replace(tzinfo=None)
+    end_time = end_time.replace(tzinfo=None)
+
 
     poll = poll_service.create_poll(
         question=question,
         options=options,
         created_by=created_by,
         start_time=start_time,
-        end_time=end_time
+        end_time=end_time,
     )
 
-    return jsonify({
-        "poll_id": poll.public_id,
-        "question": poll.question,
-        "options": [{"id": o.id, "text": o.text} for o in poll.options]
-    })
+    return jsonify(
+        {
+            "poll_id": poll.public_id,
+            "question": poll.question,
+            "options": [{"id": o.id, "text": o.text} for o in poll.options],
+        }
+    )
 
 
 # ─── List All Polls (with status badges for table) ──────────────────────────
+
 
 @api_blueprint.route("/polls", methods=["GET"])
 def get_polls():
@@ -53,6 +67,7 @@ def get_polls():
 
 
 # ─── Get Single Poll Detail (with timer + status) ───────────────────────────
+
 
 @api_blueprint.route("/polls/<public_id>", methods=["GET"])
 def get_poll_detail(public_id):
@@ -64,6 +79,7 @@ def get_poll_detail(public_id):
 
 
 # ─── Cast Vote ──────────────────────────────────────────────────────────────
+
 
 @api_blueprint.route("/polls/<public_id>/vote", methods=["POST"])
 def vote(public_id):
@@ -89,6 +105,7 @@ def vote(public_id):
 
 # ─── Get Poll Results ───────────────────────────────────────────────────────
 
+
 @api_blueprint.route("/polls/<poll_id>/results", methods=["GET"])
 def get_results(poll_id):
     # 1. Try to get real-time data from Redis
@@ -110,7 +127,4 @@ def get_results(poll_id):
         if poll:
             results = {o.text: 0 for o in poll.options}
 
-    return jsonify({
-        "poll_id": poll_id,
-        "results": results
-    })
+    return jsonify({"poll_id": poll_id, "results": results})

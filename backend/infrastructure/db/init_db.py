@@ -1,3 +1,4 @@
+# infrastructure/db/init_db.py
 from .database import engine, Base
 
 # Import models so SQLAlchemy knows about them

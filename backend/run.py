@@ -1,4 +1,5 @@
-from .app import create_app
+# run.py
+from backend.factory import create_app
 from backend.extensions import socketio
 
 app = create_app()

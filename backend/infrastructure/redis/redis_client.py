@@ -1,3 +1,4 @@
+# infrastructure/redis/redis_client.py
 import redis
 import os
 
@@ -5,11 +6,11 @@ import os
 REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
 REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
 
-redis_client = redis.Redis(
+redis_client : redis.Redis = redis.Redis(
     host=REDIS_HOST,
     port=REDIS_PORT,
     decode_responses=True,
-    socket_connect_timeout=5 # Don't wait forever if it's down
+    socket_connect_timeout=5 
 )
 
 try:

@@ -1,8 +1,8 @@
+# app/producers/vote_producer.py
 from kafka import KafkaProducer
 import json
-from abc import ABC, abstractmethod
 
-class VoteProducer(ABC):
+class VoteProducer():
     
     # Initialize the Kafka producer, this connects to the Kafka broker and sets up the serializer for the messages
     def __init__(self):

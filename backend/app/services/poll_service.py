@@ -1,11 +1,12 @@
-from datetime import datetime
+# app/services/poll_service.py
+from datetime import datetime, timezone
 import uuid
 from typing import List, Optional, Dict
 
 from backend.app.domain.entities.poll import Poll
 from backend.app.domain.entities.option import Option
 from backend.app.repositories.poll_repository import PollRepository
-
+from backend.infrastructure.redis.redis_client import redis_client
 
 class PollService:
     
@@ -21,8 +22,8 @@ class PollService:
         end_time: datetime
     ) -> Poll:
     
-        # Use string IDs for internal entities and public_id
-        poll_id = str(uuid.uuid4())
+        # Use UUID int IDs for internal entities and string public_id
+        poll_id = uuid.uuid4().int
         public_id = str(uuid.uuid4())
 
         option_entities = []
@@ -31,20 +32,20 @@ class PollService:
             option_entities.append(
                 Option(
                     id=str(uuid.uuid4()),
-                    poll_id=poll_id,
+                    poll_id=str(poll_id),
                     text=text
                 )
             )
 
         poll = Poll(
-            id=poll_id,
+            id=str(poll_id),
             public_id=public_id,
             question=question,
             created_by=created_by,
             options=option_entities,
             start_time=start_time,
             end_time=end_time,
-            created_at=datetime.now()
+            created_at=datetime.now(timezone.utc).replace(tzinfo=None)
         )
 
         self.poll_repository.save(poll)
@@ -64,12 +65,16 @@ class PollService:
         if not poll:
             return None
 
-        now = datetime.now()
+        now = datetime.now(timezone.utc).replace(tzinfo=None)  # UTC now
+
+        start = poll.start_time.replace(tzinfo=None) if poll.start_time.tzinfo else poll.start_time
+        end = poll.end_time.replace(tzinfo=None) if poll.end_time.tzinfo else poll.end_time
+        now = now.replace(tzinfo=None) if now.tzinfo else now
         
         # Determine status
-        if now < poll.start_time:
+        if now < start:
             status = "upcoming"
-        elif poll.start_time <= now <= poll.end_time:
+        elif start <= now <= end:
             status = "active"
         else:
             status = "ended"
@@ -89,8 +94,8 @@ class PollService:
             "poll_id": poll.public_id,
             "question": poll.question,
             "options": [{"id": o.id, "text": o.text} for o in poll.options],
-            "start_time": poll.start_time.isoformat(),
-            "end_time": poll.end_time.isoformat(),
+            "start_time": poll.start_time.isoformat() +"Z",
+            "end_time": poll.end_time.isoformat() +"Z",
             "created_by": poll.created_by,
             "status": status,
             "time_remaining": time_remaining,
@@ -100,7 +105,7 @@ class PollService:
     def list_active_polls(self) -> List[Poll]:
         """Return polls that are currently active (between start and end time)."""
         all_polls = self.poll_repository.list_all_polls()
-        now = datetime.now()
+        now = datetime.now(timezone.utc).replace(tzinfo=None)  # UTC now
         return [p for p in all_polls if p.start_time <= now <= p.end_time]
 
     def get_active_polls(self) -> List[Poll]:
@@ -113,10 +118,15 @@ class PollService:
         Needed so users can see upcoming and ended polls too.
         """
         all_polls = self.poll_repository.list_all_polls()
-        now = datetime.now()
+        now = datetime.now(timezone.utc).replace(tzinfo=None)  # UTC now
         result = []
 
         for poll in all_polls:
+
+            key = f"poll:{poll.public_id}"
+            redis_results = redis_client.hgetall(key) or {}
+            total_votes = sum(int(v) for v in redis_results.values())
+
             if now < poll.start_time:
                 status = "upcoming"
                 time_until_start = poll.start_time - now
@@ -136,7 +146,8 @@ class PollService:
                 "badge_text": badge_text,
                 "start_time": poll.start_time.isoformat(),
                 "end_time": poll.end_time.isoformat(),
-                "total_options": len(poll.options)
+                "total_options": len(poll.options),
+                "total_votes": total_votes
             })
 
         return result

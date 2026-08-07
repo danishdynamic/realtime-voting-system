@@ -1,3 +1,4 @@
+# app/consumers/vote_consumer.py
 import json
 import asyncio
 import inspect
@@ -54,8 +55,7 @@ for message in consumer:
     # 5. Get updated totals for the chart
     raw_results = redis_client.hgetall(key)
     # If redis client is async, hgetall may return an awaitable — handle both sync/async
-    if inspect.isawaitable(raw_results):
-        raw_results = asyncio.run(raw_results)
+    
     raw_results = raw_results or {}
     results = {k.decode('utf-8') if isinstance(k, bytes) else k: int(v) for k, v in raw_results.items()}
 

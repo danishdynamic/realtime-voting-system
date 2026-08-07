@@ -1,3 +1,4 @@
+# app/repositories/poll_repository.py
 from abc import ABC, abstractmethod
 from ..domain.entities.poll import Poll
 from typing import Optional, List

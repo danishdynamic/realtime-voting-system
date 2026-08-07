@@ -1,7 +1,9 @@
-from sqlalchemy.orm import Session, joinedload # Added joinedload
+# infrastructure/repositories/sqlite_poll_repository.py
+
+from sqlalchemy.orm import Session, joinedload 
 from backend.app.repositories.poll_repository import PollRepository
 from backend.app.repositories.vote_repository import VoteRepository
-from ..models.poll_model import PollModel
+from backend.infrastructure.models.poll_model import PollModel
 from datetime import datetime
 from backend.app.domain.entities.poll import Poll
 from backend.infrastructure.models.option_model import OptionModel
@@ -25,10 +27,10 @@ class SqlitePollRepository(PollRepository):
             return None
         
         options = [
-            Option(id=o.id, poll_id=o.poll_id, text=o.text)
+            Option(id=str(o.id), poll_id=str(o.poll_id), text=o.text)
             for o in poll_model.options
         ]
-        
+
         try:
             return Poll(
                 id=str(poll_model.id),
@@ -60,7 +62,7 @@ class SqlitePollRepository(PollRepository):
         for p in polls:
             # Map DB options to Domain options
             domain_options = [
-                Option(id=o.id, poll_id=o.poll_id, text=o.text)
+                Option(id=str(o.id), poll_id=str(o.poll_id), text=o.text)
                 for o in p.options
             ]
 
@@ -83,13 +85,38 @@ class SqlitePollRepository(PollRepository):
 
         # Return OUTSIDE the loop
         return result
+
+
+    def list_all_polls(self) -> List[Poll]:
+        """Return all polls regardless of status, ordered by newest first."""
+        poll_models = self.db.query(PollModel).order_by(PollModel.created_at.desc()).all()
+        return [self._to_entity(m) for m in poll_models]
+
+    def _to_entity(self, model: PollModel) -> Poll:
+        """Helper to convert SQLAlchemy model to domain entity."""
+        return Poll(
+            id=str(model.id),
+            public_id = model.public_id,
+            question = model.question,
+            created_by = model.created_by,
+            options=[
+                Option(
+                    id=str(o.id),
+                    poll_id=str(o.poll_id),
+                    text=o.text
+                ) for o in model.options
+            ],
+            start_time = model.start_time,  
+            end_time = model.end_time,       
+            created_at = model.created_at
+        )
     
 
     # implenting save() method from PollRepository interface
 
     def save(self, poll: Poll):
         poll_model = PollModel(
-            id=poll.id,
+            # id=poll.id,
             public_id=poll.public_id,
             question=poll.question,
             created_by=poll.created_by,
@@ -98,14 +125,16 @@ class SqlitePollRepository(PollRepository):
             created_at=poll.created_at
         )
         self.db.add(poll_model)
+        self.db.flush()
 
         for option in poll.options:
             option_model = OptionModel(
-                id=option.id,
-                poll_id=poll.id,
+                # id=option.id,
+                poll_id=poll_model.id,
                 text=option.text
             )
             self.db.add(option_model)
+            
             
         self.db.commit()
 

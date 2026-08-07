@@ -1,6 +1,7 @@
-from app import create_socketio_app
+# websocket_server.py
+
+from backend.factory import create_socketio_app
 from backend.extensions import socketio
-from backend.infrastructure.redis.redis_client import redis_client
 
 app = create_socketio_app()
 

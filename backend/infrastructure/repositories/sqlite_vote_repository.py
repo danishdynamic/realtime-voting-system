@@ -1,3 +1,5 @@
+# infrastructure/repositories/sqlite_vote_repository.py
+
 from sqlalchemy.orm import Session
 from typing import List, Optional, cast
 from datetime import datetime
@@ -5,7 +7,7 @@ from datetime import datetime
 from backend.app.repositories.vote_repository import VoteRepository
 from backend.app.domain.entities.vote import Vote
 from backend.infrastructure.models.vote_model import VoteModel
-from backend.infrastructure.models.poll_model import PollModel  # <-- IMPORT THIS
+from backend.infrastructure.models.poll_model import PollModel 
 from sqlalchemy.exc import SQLAlchemyError
 
 

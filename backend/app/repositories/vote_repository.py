@@ -1,3 +1,4 @@
+# app/repositories/vote_repository.py
 from abc import ABC, abstractmethod
 from typing import List, Optional
 from ..domain.entities.vote import Vote

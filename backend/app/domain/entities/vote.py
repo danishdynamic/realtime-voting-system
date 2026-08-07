@@ -1,3 +1,4 @@
+# app/domain/entities/vote.py
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Optional
