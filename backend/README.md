@@ -2,6 +2,14 @@
 
 A distributed, event driven backend for real-time polling built with **Flask**, **Redis**, **Kafka**, and **SQLite**.
 
+[![Docker](https://img.shields.io/badge/docker-1.41.0-blue?logo=docker&logoColor=white)
+](https://www.docker.com/)
+[![Python](https://img.shields.io/badge/python-3.11.6-blue?logo=python&logoColor=white)](https://www.python.org/)
+[![Flask](https://img.shields.io/badge/flask-3.2.5-blue?logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
+[![Redis](https://img.shields.io/badge/redis-7.2.0-blue?logo=redis&logoColor=white)](https://redis.io/)
+[![Kafka](https://img.shields.io/badge/kafka-3.6.0-blue?logo=apachekafka&logoColor=white)](https://kafka.apache.org/)
+[![SQLite](https://img.shields.io/badge/sqlite-3.43.1-blue?logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+
 ## Architecture
 
 ```mermaid

@@ -2,6 +2,17 @@
 
 A distributed, event driven real time voting platform designed for high throughput ingestion, sub second latency, and horizontal scalability.
 
+[![Frontend](https://img.shields.io/badge/frontend-React-blue?logo=react&logoColor=white)](./frontend/README.md)
+[![Backend](https://img.shields.io/badge/backend-Flask-blue?logo=flask&logoColor=white)](./backend/README.md)
+
+---
+## 📷 Screenshots
+
+![Screenshot](./frontend/assets/../src/assets/kafka_redis_connect.png)
+
+![Demo video](./frontend/assets/vote_demo.gif)
+
+
 ---
 
 ## 📖 Quick Links & Documentation
@@ -157,6 +168,77 @@ docker-compose up -d
 Follow the setup guides in each module directory:
 - **Backend Service Setup**
 - **Frontend Application Setup**
+
+- TERMINAL 1: Infrastructure
+
+```bash
+cd realtime-voting-system
+docker-compose up -d
+```
+
+- TERMINAL 2: Flask API 
+
+```bash
+cd backend
+source venv/bin/activate
+python run.py
+```
+
+- TERMINAL 3: Kafka Consumer 
+
+```bash
+cd backend
+source venv/bin/activate
+python -m backend.app.consumers.vote_consumer
+```
+
+- TERMINAL 4: WebSocket Server
+
+```bash
+cd backend
+source venv/bin/activate
+python websocket_server.py
+```
+
+- TERMINAL 5: Frontend 
+
+```bash
+cd frontend
+npm install        # first time only
+npm run dev
+```
+---
+
+## Backend Tests 
+
+```bash
+cd backend
+pytest tests/test_smoke.py -v
+pytest tests/test_vote.py -v
+```
+
+### BROWSER: Manual Testing 
+
+1. Open http://localhost:3000
+2. Click "Create Your First Poll"
+3. Enter question, options, pick duration
+4. Submit → redirects to new poll
+5. Vote on an option → confetti + live count updates
+6. Open second browser/incognito → vote as different user
+7. Watch both browsers update in real-time
+8. Wait for timer to expire → winner banner appears
+
+### Quick Troubleshooting
+
+| Issue                      | Fix                                                      |
+| -------------------------- | -------------------------------------------------------- |
+| `Port 5000 already in use` | `lsof -ti:5000 \| xargs kill -9`                         |
+| `ModuleNotFoundError`      | `pip install -r requirements.txt`                        |
+| `Kafka not connecting`     | Wait 10s after `docker-compose up`, then retry           |
+| `CORS error in browser`    | Check `VITE_API_URL` matches `http://localhost:5000/api` |
+| `Socket not updating`      | Check WebSocket server is running on port 8000           |
+| `npm install fails`        | Delete `node_modules` and `package-lock.json`, retry     |
+
 
 ---
 
