@@ -19,12 +19,12 @@ A distributed, event driven real time voting platform designed for high throughp
 
 * ⚙️ **[Backend Documentation](./backend/README.md)** – Detailed Flask API contracts, Kafka consumer logic, and DB migrations.
 * 🎨 **[Frontend Documentation](./frontend/README.md)** – React setup, state management, UI components, and WebSocket hooks.
-* 🛠️ **[Infra structure Docs](./infra.md)** – Multi container local infrastructure orchestrating.
+* 🛠️ **[Infra structure Docs](./INFRA.md)** – Multi container local infrastructure orchestrating.
 ---
 
 ## 🎯 System Objectives
 
-* **High Throughput:** Non-blocking vote ingestion capable of buffering spikes using Kafka.
+* **High Throughput:** Non blocking vote ingestion capable of buffering spikes using Kafka.
 * **Real-Time Delivery:** Instant UI updates via WebSockets powered by Redis Pub/Sub.
 * **Fault Tolerance:** At least once message processing with decoupled producer/consumer components.
 * **Scalability:** Fully containerized components ready for horizontal scaling.
