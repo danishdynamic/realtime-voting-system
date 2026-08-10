@@ -19,8 +19,7 @@ A distributed, event driven real time voting platform designed for high throughp
 
 * ⚙️ **[Backend Documentation](./backend/README.md)** – Detailed Flask API contracts, Kafka consumer logic, and DB migrations.
 * 🎨 **[Frontend Documentation](./frontend/README.md)** – React setup, state management, UI components, and WebSocket hooks.
-* 🛠️ **[Architecture Docs](./docs/architecture.md)** – Deep dive design choices, throughput calculations, and reliability considerations.
-
+* 🛠️ **[Infra structure Docs](./infra.md)** – Multi container local infrastructure orchestrating.
 ---
 
 ## 🎯 System Objectives
